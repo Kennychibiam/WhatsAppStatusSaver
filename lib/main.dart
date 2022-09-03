@@ -1,30 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:whatsapp_status_saver/pages/photos.dart';
 import 'package:whatsapp_status_saver/pages/saved_media.dart';
 import 'package:whatsapp_status_saver/pages/videos.dart';
+import 'package:whatsapp_status_saver/providers/media_manager_provider.dart';
 import 'package:whatsapp_status_saver/search_for_whatsapp_directory.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-
-void main()async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  var status=await Permission.storage.request();
-  if(status.isGranted) {
+  bool isAllPermissionsGranted=true;
+  Map<Permission,PermissionStatus>permissions=await [Permission.storage,Permission.manageExternalStorage].request();
+  permissions.forEach((key, value) { isAllPermissionsGranted=value.isGranted;});
+
+  if (isAllPermissionsGranted) {
     SearchDirectoryClass searchDirectoryClass = SearchDirectoryClass();
-    String? whatsAppPath = await searchDirectoryClass
-        .getWhatsAppStatusDirectory();
-    print(whatsAppPath);
+    MediaManagerProvider mediaManagerProvider=MediaManagerProvider();
+    mediaManagerProvider.setVideosAndPhotos=await searchDirectoryClass.getWhatsAppStatusDirectory();
 
-    runApp(MaterialApp(debugShowCheckedModeBanner: false,
-      home: MyApp(
 
+    runApp(ChangeNotifierProvider<MediaManagerProvider>(
+      create:(_)=> mediaManagerProvider,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MyApp(),
       ),
     ));
-  }
-  else{
-
-  }
+  } else {}
 }
 
 class MyApp extends StatefulWidget {
@@ -34,53 +37,56 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp>with SingleTickerProviderStateMixin {
-  late TabController tabBarController=TabController(length: 3,vsync:this);
-
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  late TabController tabBarController = TabController(length: 3, vsync: this);
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    tabBarController.addListener(() {
-
-    });
+    tabBarController.addListener(() {});
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
     tabBarController.dispose();
   }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         return false;
       },
       child: Scaffold(
-            appBar: AppBar(
-              bottom:TabBar(
-                controller:tabBarController,
-                tabs:[
-                  Center(child: Tab(text: "PHOTOS",)),
-                  Center(child: Tab(text: "VIDEOS",)),
-                  Center(child: Tab(text: "SAVED",)),
-                ]
-              )
-            ),
+        appBar: AppBar(
+            bottom: TabBar(controller: tabBarController, tabs: [
+          Center(
+              child: Tab(
+            text: "PHOTOS",
+          )),
+          Center(
+              child: Tab(
+            text: "VIDEOS",
+          )),
+          Center(
+              child: Tab(
+            text: "SAVED",
+          )),
+        ])),
         body: TabBarView(
+
           controller: tabBarController,
           children: [
             Photos(),
             Videos(),
             SavedMedia(),
-
           ],
         ),
       ),
     );
   }
 }
-
