@@ -25,7 +25,7 @@ class _PhotosState extends State<Photos>with AutomaticKeepAliveClientMixin<Photo
     return GridView(
       shrinkWrap: true,
       reverse:true,
-        children: mediaManagerProvider.photoFiles.map((filePath) => buildPhotosView(filePath,width)).toList(),
+        children: mediaManagerProvider.photosModel.map((model) => buildPhotosView(model.photoPath??"",width)).toList(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2
         ),

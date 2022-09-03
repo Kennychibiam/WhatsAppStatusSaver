@@ -7,7 +7,6 @@ import 'package:path/path.dart' as path;
 class SearchDirectoryClass {
   Future<Map<String, dynamic>?> getWhatsAppStatusDirectory() async {
     Directory? file = await path_provider.getExternalStorageDirectory();
-    print(file?.path);
     List<String>? splitPlath = file?.path.split("/");
     String rootPath = "";
     for (int i = 0; i < 4; ++i) {
@@ -24,7 +23,12 @@ class SearchDirectoryClass {
       List<FileSystemEntity> fileSystemEntity = directory.listSync();
       for (var fileEntity in fileSystemEntity) {
         absolutePath = fileEntity.path.toString();
-        if (path.basenameWithoutExtension(absolutePath) == "WhatsApp") {
+        List<String>directoryStrings=[];
+       try{
+       directoryStrings=Directory(absolutePath).listSync().map((e) => e.path).toList();//checks if folder is actually whatsapp folder
+       }
+       catch(e){}
+        if (path.basenameWithoutExtension(absolutePath) == "WhatsApp" && directoryStrings.contains(absolutePath+"/Media") ) {
           isDirectoryFound = true;
           break;
         } else {
@@ -33,6 +37,9 @@ class SearchDirectoryClass {
       }
     }
     if (isDirectoryFound) {//if whatsapp folder found check for .media and .statuses to retrieve files
+
+
+
       FileSystemEntity mediaFolder = Directory(absolutePath)
           .listSync()
           .firstWhere((element) =>

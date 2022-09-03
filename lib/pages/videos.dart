@@ -24,8 +24,9 @@ class _VideosState extends State<Videos>
     return GridView(
       shrinkWrap: true,
       reverse: true,
-      children: mediaManagerProvider.videoFiles
-          .map((filePath) => buildPhotosView(filePath, width))
+      children: mediaManagerProvider.videoModel
+          .map((videoModel) =>
+              buildPhotosView(videoModel.videoPath ?? "", width))
           .toList(),
       gridDelegate:
           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
@@ -54,24 +55,41 @@ class _VideosState extends State<Videos>
                           fit: BoxFit.cover),
                       Center(
                           child: Icon(
-                            size: 36.0,
-                            Icons.play_circle_fill,
+                        size: 36.0,
+                        Icons.play_circle_fill,
                         color: Colors.grey,
                       )),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: IconButton(
+                            onPressed: () {},
+                            icon:
+                                CircleAvatar(child: Icon(Icons.download_rounded))),
+                      ),
                     ],
                   )
                 : Stack(
-                  children:[ Container(
-                      color: Colors.black38,
-                    ),
-                    Center(
-                        child: Icon(
-                          size: 36.0,
-                          Icons.play_circle_fill,
-                          color: Colors.grey,
-                        )),
-                  ],
-                ),
+                    children: [
+                      Container(
+                        color: Colors.black38,
+                      ),
+                      Center(
+                          child: Icon(
+                        size: 36.0,
+                        Icons.play_circle_fill,
+                        color: Colors.grey,
+                      )),
+
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: IconButton(
+                            onPressed: () {},
+                            icon:
+                            CircleAvatar(child: Icon(Icons.download_rounded))),
+                      ),
+
+                    ],
+                  ),
           );
         });
   }
