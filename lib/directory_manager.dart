@@ -4,13 +4,15 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
 
-class SearchDirectoryClass {
+class SearchDirectoryClass{
+  static String? rootAndroidDirectory;
   Future<Map<String, dynamic>?> getWhatsAppStatusDirectory() async {
     Directory? file = await path_provider.getExternalStorageDirectory();
     List<String>? splitPlath = file?.path.split("/");
     String rootPath = "";
     for (int i = 0; i < 4; ++i) {
       rootPath += splitPlath![i] + "/";
+      rootAndroidDirectory=rootPath;
     }
     return recursivelySearchFileSystemForStatusFolder(rootPath);
   }
@@ -63,6 +65,32 @@ class SearchDirectoryClass {
 
     }
     return null;
+  }
+
+
+
+  String moveFile(File file){
+    if(rootAndroidDirectory!=null){
+
+    }
+  }
+
+  String getAppDefaultFilePath()async{
+    Directory? file = await path_provider.getExternalStorageDirectory();
+    List<String>? splitPlath = file?.path.split("/");
+    String rootPath = "";
+    for (int i = 0; i < 4; ++i) {
+      if(i!=3){
+      rootPath += splitPlath![i] + "/";
+      }
+      else{
+        rootPath += splitPlath![i] + "/Li";
+
+        rootAndroidDirectory=rootPath;
+
+      }
+    }
+
   }
 }
 
