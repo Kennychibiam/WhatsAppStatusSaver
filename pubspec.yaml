@@ -39,6 +39,7 @@ dependencies:
   path: ^1.8.1
   provider: ^6.0.3
   video_thumbnail: ^0.5.2
+  fluttertoast: ^8.0.9
 
 dev_dependencies:
   flutter_test:

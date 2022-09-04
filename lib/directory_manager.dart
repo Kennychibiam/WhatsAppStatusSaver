@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
 
-class SearchDirectoryClass{
+class DirectoryManager{
   static String? rootAndroidDirectory;
   Future<Map<String, dynamic>?> getWhatsAppStatusDirectory() async {
     Directory? file = await path_provider.getExternalStorageDirectory();
@@ -12,7 +12,6 @@ class SearchDirectoryClass{
     String rootPath = "";
     for (int i = 0; i < 4; ++i) {
       rootPath += splitPlath![i] + "/";
-      rootAndroidDirectory=rootPath;
     }
     return recursivelySearchFileSystemForStatusFolder(rootPath);
   }
@@ -69,13 +68,33 @@ class SearchDirectoryClass{
 
 
 
-  String moveFile(File file){
-    if(rootAndroidDirectory!=null){
+  Future<dynamic> moveFile(File file)async{//copy file from whatsapp status folder to application's folder
+    bool isFileCopySuccessful=true;
+    String newFilePath="";
+    try {
+      if (rootAndroidDirectory != null) {
+        if (!Directory(rootAndroidDirectory ?? "").existsSync()) {
+          Directory(rootAndroidDirectory ?? "").createSync();
+        }
+        newFilePath=rootAndroidDirectory! + path.basename(file.path);
+        file.copySync(newFilePath);
+      }
+      else {
+        String androidAppPath = await getAppDefaultFilePath();
+        if (!Directory(androidAppPath ).existsSync()) {
+          Directory(androidAppPath).createSync();
+        }
 
+        newFilePath=rootAndroidDirectory! + path.basename(file.path);
+        file.copySync(newFilePath);
+      }
+    }catch(e){
+      isFileCopySuccessful=false;
     }
+    return [isFileCopySuccessful,newFilePath];
   }
 
-  String getAppDefaultFilePath()async{
+  Future<String> getAppDefaultFilePath()async{
     Directory? file = await path_provider.getExternalStorageDirectory();
     List<String>? splitPlath = file?.path.split("/");
     String rootPath = "";
@@ -84,13 +103,13 @@ class SearchDirectoryClass{
       rootPath += splitPlath![i] + "/";
       }
       else{
-        rootPath += splitPlath![i] + "/Li";
+        rootPath += splitPlath![i] + "/Status Saver WhatsApp/";
 
         rootAndroidDirectory=rootPath;
 
       }
     }
-
+   return rootPath;
   }
 }
 

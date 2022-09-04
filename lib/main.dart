@@ -4,7 +4,7 @@ import 'package:whatsapp_status_saver/pages/photos.dart';
 import 'package:whatsapp_status_saver/pages/saved_media.dart';
 import 'package:whatsapp_status_saver/pages/videos.dart';
 import 'package:whatsapp_status_saver/providers/media_manager_provider.dart';
-import 'package:whatsapp_status_saver/search_for_whatsapp_directory.dart';
+import 'package:whatsapp_status_saver/directory_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
@@ -15,9 +15,9 @@ void main() async {
   permissions.forEach((key, value) { isAllPermissionsGranted=value.isGranted;});
 
   if (isAllPermissionsGranted) {
-    SearchDirectoryClass searchDirectoryClass = SearchDirectoryClass();
-    MediaManagerProvider mediaManagerProvider=MediaManagerProvider();
-    mediaManagerProvider.setVideosAndPhotos=await searchDirectoryClass.getWhatsAppStatusDirectory();
+    DirectoryManager directoryManager =DirectoryManager();
+    MediaManagerProvider mediaManagerProvider=MediaManagerProvider(directoryManager);
+    mediaManagerProvider.initializeVideoAndPhotosModels();
 
 
     runApp(ChangeNotifierProvider<MediaManagerProvider>(
