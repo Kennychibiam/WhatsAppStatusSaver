@@ -7,9 +7,10 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:whatsapp_status_saver/directory_manager.dart';
 import 'package:whatsapp_status_saver/models/saved_media.dart';
 import 'package:whatsapp_status_saver/models/videos.dart';
-import 'package:whatsapp_status_saver/pages/saved_media.dart';
 import 'package:whatsapp_status_saver/providers/media_manager_provider.dart';
-import 'package:path/path.dart'as path;
+import 'package:path/path.dart' as path;
+import 'package:whatsapp_status_saver/notification_widgets/custom_toast_widget.dart';
+import 'package:whatsapp_status_saver/routes/route_controller.dart';
 
 
 class Videos extends StatefulWidget {
@@ -25,20 +26,23 @@ class _VideosState extends State<Videos>
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    double width = MediaQuery
+        .of(context)
+        .size
+        .width;
     mediaManagerProvider =
         Provider.of<MediaManagerProvider>(context, listen: false);
     return GridView(
       shrinkWrap: true,
       children: mediaManagerProvider.videosModel
-          .map((videoModel) => buildPhotosView(
-              videoModel.videoPath ?? "",
-              width,
-              videoModel.isDownloading ?? false,
-              videoModel.isVideoDownloaded ?? false))
+          .map((videoModel) =>
+          buildPhotosView(
+            videoModel,
+            width,
+          ))
           .toList(),
       gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
       // itemBuilder: (context,index){
       //   String photoFile=mediaManagerProvider.photoFiles[index];
       //   return buildPhotosView(photoFile, width);
@@ -46,16 +50,26 @@ class _VideosState extends State<Videos>
     );
   }
 
-  Widget buildPhotosView(String videoPath, double screenWidth,
-      bool isDownloading, bool isDownloaded) {
-    return FutureBuilder<Uint8List?>(
-        future: VideoThumbnail.thumbnailData(
-            quality: 100, video: videoPath, imageFormat: ImageFormat.PNG),
-        builder: (context, snapshot) {
-          return Container(
-            margin: EdgeInsets.all(5.0),
-            child: snapshot.data != null
-                ? Stack(
+  Widget buildPhotosView(VideosModel videoModel, double screenWidth) {
+    var file = File(videoModel.videoPath ?? "");
+    int index = mediaManagerProvider.videosModel.indexOf(videoModel);
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, RouteGenerator.CAROUSEL_PAGE, arguments: {
+          "StartIndex": index,
+          "FilePaths": mediaManagerProvider.videosModel,
+          "IsFromSavedMedia": false
+        }
+        );
+      },
+      child: FutureBuilder<Uint8List?>(
+          future: VideoThumbnail.thumbnailData(
+              quality: 100, video: file.path, imageFormat: ImageFormat.PNG),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data!=null) {
+              return Container(
+                  margin: EdgeInsets.all(5.0),
+                  child: Stack(
                     children: [
                       Image.memory(
                           gaplessPlayback: true,
@@ -65,88 +79,115 @@ class _VideosState extends State<Videos>
                           fit: BoxFit.cover),
                       Center(
                           child: Icon(
+                            size: 36.0,
+                            Icons.play_circle_fill,
+                            color: Colors.grey,
+                          )),
+                      if (!videoModel.isDownloading! &&
+                          !videoModel.isVideoDownloaded!)
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: IconButton(
+                              onPressed: () {
+                                downloadFile(videoModel.videoPath ?? "");
+                              },
+                              icon: CircleAvatar(
+                                  child: Icon(Icons.download_rounded))),
+                        )
+                      else
+                        if (videoModel.isDownloading!)
+                          Align(
+                              alignment: Alignment.bottomRight,
+                              child: CircularProgressIndicator())
+                        else
+                          if (videoModel.isVideoDownloaded!)
+                            SizedBox()
+
+                    ],
+                  ));
+            }
+
+            return Container(
+              margin: EdgeInsets.all(5.0),
+
+              child: Stack(
+                children: [
+                  Container(
+                    color: Colors.black38,
+                  ),
+                  Center(
+                      child: Icon(
                         size: 36.0,
                         Icons.play_circle_fill,
                         color: Colors.grey,
                       )),
-                      if (!isDownloading && !isDownloaded)
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: IconButton(
-                              onPressed: () {downloadFile(videoPath);},
-                              icon: CircleAvatar(
-                                  child: Icon(Icons.download_rounded))),
-                        )
-                      else if (isDownloading)
+                  if (!videoModel.isDownloading! &&
+                      !videoModel.isVideoDownloaded!)
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: IconButton(
+                          onPressed: () {
+                            downloadFile(file.path);
+                          },
+                          icon: CircleAvatar(
+                              child: Icon(Icons.download_rounded))),
+                    )
+                  else
+                    if (videoModel.isVideoDownloaded!)
+                      SizedBox()
+                    else
+                      if (videoModel.isDownloading!)
                         Align(
                             alignment: Alignment.bottomRight,
                             child: CircularProgressIndicator())
-                      else if (isDownloaded)
-                        SizedBox()
+                ],
+              ),
+            );
 
-                    ],
-                  )
-                : Stack(
-                    children: [
-                      Container(
-                        color: Colors.black38,
-                      ),
-                      Center(
-                          child: Icon(
-                        size: 36.0,
-                        Icons.play_circle_fill,
-                        color: Colors.grey,
-                      )),
-                      if (!isDownloading && !isDownloaded)
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: IconButton(
-                              onPressed: () {downloadFile(videoPath);},
-                              icon: CircleAvatar(
-                                  child: Icon(Icons.download_rounded))),
-                        )
-                      else if (isDownloaded)
-                        SizedBox()
-                      else if (isDownloading)
-                        Align(
-                            alignment: Alignment.bottomRight ,
-                            child: CircularProgressIndicator())
-                    ],
-                  ),
-          );
-        });
+          }),
+    );
   }
 
 
-  downloadFile(String videoPath)async{
-   File videoFile= File(videoPath);
-    if(videoFile.existsSync()){
-     mediaManagerProvider.videosModel.firstWhere((element) => element.videoPath==videoPath).isDownloading=true;
+  downloadFile(String videoPath) async {
+    File videoFile = File(videoPath);
+    if (videoFile.existsSync()) {
+      mediaManagerProvider.videosModel
+          .firstWhere((element) => element.videoPath == videoPath)
+          .isDownloading = true;
 
       setState(() {
 
       });
-      DirectoryManager directoryManager=DirectoryManager();
-      dynamic resultFromFileCopy=await directoryManager.moveFile(videoFile);
-     mediaManagerProvider.videosModel.firstWhere((element) => element.videoPath==videoPath).isDownloading=false;
-     if(resultFromFileCopy[0]==true){
-       mediaManagerProvider.videosModel.firstWhere((element) => element.videoPath==videoPath).isVideoDownloaded=true;
-       SavedMediaModel savedMediaModel=SavedMediaModel(savedModelPath:resultFromFileCopy[1]);
-       if(mediaManagerProvider.savedMediaModel.isNotEmpty){
-         mediaManagerProvider.savedMediaModel.insert(0, savedMediaModel);
-       }else {
-         mediaManagerProvider.savedMediaModel.add(savedMediaModel);
-       }
-       mediaManagerProvider.notifyListeners();
-     }
-      else{
+      DirectoryManager directoryManager = DirectoryManager();
+      dynamic resultFromFileCopy = await directoryManager.moveFile(videoFile);
+      mediaManagerProvider.videosModel
+          .firstWhere((element) => element.videoPath == videoPath)
+          .isDownloading = false;
+      if (resultFromFileCopy[0] == true) {
+        mediaManagerProvider.videosModel
+            .firstWhere((element) => element.videoPath == videoPath)
+            .isVideoDownloaded = true;
+        SavedMediaModel savedMediaModel = SavedMediaModel(
+            savedModelPath: resultFromFileCopy[1]);
+        customToastWidget("Status Saved");
 
+        if (mediaManagerProvider.savedMediaModel.isNotEmpty) {
+          mediaManagerProvider.savedMediaModel.insert(0, savedMediaModel);
+        } else {
+          mediaManagerProvider.savedMediaModel.add(savedMediaModel);
+        }
+        mediaManagerProvider.notifyListeners();
+      }
+      else {
+        customToastWidget("Save Failed!");
       }
       setState(() {
 
       });
     }
   }
+
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;

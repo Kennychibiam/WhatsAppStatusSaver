@@ -4,5 +4,5 @@ class PhotosModel{
   bool?isDownloading;
   DateTime?dateModified;
 
-  PhotosModel({this.photoPath,this.isPhotoDownloaded,this.isDownloading,this.dateModified});
+  PhotosModel({this.photoPath,this.isPhotoDownloaded,required this.isDownloading,this.dateModified});
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whatsapp_status_saver/pages/photos.dart';
@@ -6,9 +8,11 @@ import 'package:whatsapp_status_saver/pages/videos.dart';
 import 'package:whatsapp_status_saver/providers/media_manager_provider.dart';
 import 'package:whatsapp_status_saver/directory_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:whatsapp_status_saver/routes/route_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
 
   bool isAllPermissionsGranted=true;
   Map<Permission,PermissionStatus>permissions=await [Permission.storage,Permission.manageExternalStorage].request();
@@ -24,7 +28,8 @@ void main() async {
       create:(_)=> mediaManagerProvider,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: MyApp(),
+        onGenerateRoute: RouteGenerator.routeGenerator,
+        initialRoute: RouteGenerator.MAIN_PAGE,
       ),
     ));
   } else {}
@@ -77,14 +82,16 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
             text: "SAVED",
           )),
         ])),
-        body: TabBarView(
+        body: Consumer<MediaManagerProvider>(
+          builder:(context,instance,child)=> TabBarView(
 
-          controller: tabBarController,
-          children: [
-            Photos(),
-            Videos(),
-            SavedMedia(),
-          ],
+            controller: tabBarController,
+            children: [
+              Photos(),
+              Videos(),
+              SavedMedia(),
+            ],
+          ),
         ),
       ),
     );

@@ -22,8 +22,8 @@ class MediaManagerProvider extends ChangeNotifier{
   void initializeVideoAndPhotosModels()async{
     Map<String,dynamic>?mapForVideosAndPhotos=await directoryManager?.getWhatsAppStatusDirectory();
     if(mapForVideosAndPhotos!=null){
-      photosModel=List<String>.from(mapForVideosAndPhotos["Photos"]).map((e) => PhotosModel(photoPath: e,dateModified: File(e).statSync().modified)).toList();
-      videosModel=List<String>.from(mapForVideosAndPhotos["Videos"]).map((e) => VideosModel(videoPath: e,dateModified: File(e).statSync().modified)).toList();
+      photosModel=List<String>.from(mapForVideosAndPhotos["Photos"]).map((e) => PhotosModel(photoPath: e,dateModified: File(e).statSync().modified,isDownloading: false,isPhotoDownloaded: false)).toList();
+      videosModel=List<String>.from(mapForVideosAndPhotos["Videos"]).map((e) => VideosModel(videoPath: e,dateModified: File(e).statSync().modified,isDownloading: false,isVideoDownloaded: false)).toList();
 
       photosModel.sort((a, b) =>b.dateModified!.compareTo(a.dateModified??DateTime.now()));
       videosModel.sort((a, b) =>b.dateModified!.compareTo(a.dateModified??DateTime.now()));
@@ -34,8 +34,10 @@ class MediaManagerProvider extends ChangeNotifier{
 
 
       if (!defaultAppDirectory.existsSync()) {
+        print("not exists");
 
       }else{//if default ap folder exists check if file is already downloaded
+        print("exists");
         savedMediaModel=defaultAppDirectory.listSync().map((e) => SavedMediaModel(savedModelPath: e.path,dateModified: e.statSync().modified)).toList();
         savedMediaModel.sort((a, b) =>b.dateModified!.compareTo(a.dateModified??DateTime.now()));
 
@@ -45,11 +47,19 @@ class MediaManagerProvider extends ChangeNotifier{
             photoModel.isPhotoDownloaded=true;
 
           }
+          else{
+            photoModel.isPhotoDownloaded=false;
+
+          }
         });
 
         videosModel.forEach((videoModel) {
           if(appSavedFiles.contains(basename(videoModel.videoPath!))){
             videoModel.isVideoDownloaded=true;
+
+          }
+          else{
+            videoModel.isVideoDownloaded=false;
 
           }
         });
@@ -58,6 +68,8 @@ class MediaManagerProvider extends ChangeNotifier{
     // photoFiles=mapForVideosAndPhotos["Photos"];
     // videoFiles=mapForVideosAndPhotos["Videos"];
     }
+
+    notifyListeners();
   }
 
 
