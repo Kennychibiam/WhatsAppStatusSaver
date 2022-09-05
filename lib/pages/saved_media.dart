@@ -9,9 +9,8 @@ import 'package:whatsapp_status_saver/models/saved_media.dart';
 import 'package:whatsapp_status_saver/models/videos.dart';
 import 'package:whatsapp_status_saver/notification_widgets/custom_toast_widget.dart';
 import 'package:whatsapp_status_saver/providers/media_manager_provider.dart';
-import 'package:path/path.dart'as path;
+import 'package:path/path.dart' as path;
 import 'package:whatsapp_status_saver/routes/route_controller.dart';
-
 
 class SavedMedia extends StatefulWidget {
   const SavedMedia({Key? key}) : super(key: key);
@@ -21,7 +20,7 @@ class SavedMedia extends StatefulWidget {
 }
 
 class _VideosState extends State<SavedMedia>
-    with AutomaticKeepAliveClientMixin<SavedMedia> {
+    with AutomaticKeepAliveClientMixin<SavedMedia>implements {
   late MediaManagerProvider mediaManagerProvider;
 
   @override
@@ -30,17 +29,16 @@ class _VideosState extends State<SavedMedia>
     mediaManagerProvider =
         Provider.of<MediaManagerProvider>(context, listen: false);
     return Consumer<MediaManagerProvider>(
-      builder:(context,instance,child)=> GridView(
+      builder: (context, instance, child) => GridView(
         shrinkWrap: true,
         children: mediaManagerProvider.savedMediaModel
             .map((savedMediaModel) => buildSavedMediaView(
-            savedMediaModel,
-            width,
-
-        ))
+                  savedMediaModel,
+                  width,
+                ))
             .toList(),
         gridDelegate:
-        SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         // itemBuilder: (context,index){
         //   String photoFile=mediaManagerProvider.photoFiles[index];
         //   return buildPhotosView(photoFile, width);
@@ -49,79 +47,132 @@ class _VideosState extends State<SavedMedia>
     );
   }
 
-  Widget buildSavedMediaView(SavedMediaModel savedMediaModel, double screenWidth) {
+  Widget buildSavedMediaView(
+      SavedMediaModel savedMediaModel, double screenWidth) {
+    var file = File(savedMediaModel.savedModelPath ?? "");
+    String filePath = file.path;
+    int index = mediaManagerProvider.savedMediaModel.indexOf(savedMediaModel);
+    return filePath.endsWith(".mp4")
+        ? GestureDetector(
+            onLongPress: () {
+              mediaManagerProvider.enableMultiSelection(savedMediaModel);
+            },
+            onTap: () {
+              if (mediaManagerProvider.isMultiSelectEnabled) {
+                mediaManagerProvider.toggleSelectItem(savedMediaModel);
+              } else {
+                Navigator.pushNamed(context, RouteGenerator.CAROUSEL_PAGE,
+                    arguments: {
+                      "StartIndex": index,
+                      "FilePaths": mediaManagerProvider.savedMediaModel,
+                      "IsFromSavedMedia": true
+                    });
+              }
+            },
+            child: FutureBuilder<Uint8List?>(
+                future: VideoThumbnail.thumbnailData(
+                    quality: 100,
+                    video: filePath,
+                    imageFormat: ImageFormat.PNG),
+                builder: (context, snapshot) {
+                  return Container(
+                    margin: EdgeInsets.all(5.0),
+                    child: snapshot.data != null
+                        ? Stack(
+                            children: [
+                              Image.memory(
+                                  gaplessPlayback: true,
+                                  snapshot.data!,
+                                  width: screenWidth / 2.0,
+                                  height: screenWidth / 2.0,
+                                  fit: BoxFit.cover),
+                              Center(
+                                  child: Icon(
+                                size: 36.0,
+                                Icons.play_circle_fill,
+                                color: Colors.grey,
+                              )),
+                              mediaManagerProvider.isMultiSelectEnabled
+                                  ? Align(
+                                      alignment: Alignment.topRight,
+                                      child: Checkbox(
+                                          value: savedMediaModel.isSelected,
+                                          onChanged: (changedValue) {
+                                            mediaManagerProvider.toggleSelectItem(savedMediaModel);
 
-    var file = File(savedMediaModel.savedModelPath??"");
-    String filePath=file.path;
-    int index=mediaManagerProvider.savedMediaModel.indexOf(savedMediaModel);
-    return filePath.endsWith(".mp4")?
+                                          }),
+                                    )
+                                  : SizedBox(),
+                            ],
+                          )
+                        : Stack(
+                            children: [
+                              Container(
+                                color: Colors.black38,
+                              ),
+                              Center(
+                                  child: Icon(
+                                size: 36.0,
+                                Icons.play_circle_fill,
+                                color: Colors.grey,
+                              )),
+                              mediaManagerProvider.isMultiSelectEnabled
+                                  ? Align(
+                                      alignment: Alignment.topRight,
+                                      child: Checkbox(
+                                          value: savedMediaModel.isSelected,
+                                          onChanged: (changedValue) {
+                                            mediaManagerProvider.toggleSelectItem(savedMediaModel);
 
-    GestureDetector(
-      onTap: (){
-        Navigator.pushNamed(context, RouteGenerator.CAROUSEL_PAGE,arguments:{
-          "StartIndex":index,
-          "FilePaths":mediaManagerProvider.savedMediaModel,
-          "IsFromSavedMedia":true
-        }
-        );
-      },
-      child: FutureBuilder<Uint8List?>(
-          future: VideoThumbnail.thumbnailData(
-              quality: 100, video: filePath, imageFormat: ImageFormat.PNG),
-          builder: (context, snapshot) {
-            return Container(
+                                          }),
+                                    )
+                                  : SizedBox(),
+                            ],
+                          ),
+                  );
+                }),
+          )
+        : GestureDetector(
+            onLongPress: () {
+              mediaManagerProvider.enableMultiSelection(savedMediaModel);
+            },
+            onTap: () {
+              if (mediaManagerProvider.isMultiSelectEnabled) {
+                mediaManagerProvider.toggleSelectItem(savedMediaModel);
+              } else {
+                Navigator.pushNamed(context, RouteGenerator.CAROUSEL_PAGE,
+                    arguments: {
+                      "StartIndex": index,
+                      "FilePaths": mediaManagerProvider.savedMediaModel,
+                      "IsFromSavedMedia": true
+                    });
+              }
+            },
+            child: Container(
               margin: EdgeInsets.all(5.0),
-              child: snapshot.data != null
-                  ? Stack(
+              child: Stack(
                 children: [
-                  Image.memory(
-                      gaplessPlayback: true,
-                      snapshot.data!,
+                  Image.file(File(filePath),
                       width: screenWidth / 2.0,
                       height: screenWidth / 2.0,
+                      gaplessPlayback: true,
                       fit: BoxFit.cover),
-                  Center(
-                      child: Icon(
-                        size: 36.0,
-                        Icons.play_circle_fill,
-                        color: Colors.grey,
-                      )),
-
-                ],
-              )
-                  : Stack(
-                children: [
-                  Container(
-                    color: Colors.black38,
-                  ),
-                  Center(
-                      child: Icon(
-                        size: 36.0,
-                        Icons.play_circle_fill,
-                        color: Colors.grey,
-                      )),
-
+                  mediaManagerProvider.isMultiSelectEnabled
+                      ? Align(
+                          alignment: Alignment.topRight,
+                          child: Checkbox(
+                              value: savedMediaModel.isSelected,
+                              onChanged: (changedValue) {
+                                mediaManagerProvider.toggleSelectItem(savedMediaModel);
+                              }),
+                        )
+                      : SizedBox(),
                 ],
               ),
-            );
-          }),
-    ):GestureDetector(
-      onTap:(){
-        Navigator.pushNamed(context, RouteGenerator.CAROUSEL_PAGE,arguments:{
-        "StartIndex":index,
-        "FilePaths":mediaManagerProvider.savedMediaModel,
-        "IsFromSavedMedia":true
-      });
-      },
-      child: Container(
-        margin: EdgeInsets.all(5.0),
-        child: Image.file(File(filePath), width: screenWidth / 2.0,
-            height: screenWidth / 2.0,
-            gaplessPlayback: true,
-            fit: BoxFit.cover),
-      ),
-    );
+            ),
+          );
   }
+
 
 
   @override

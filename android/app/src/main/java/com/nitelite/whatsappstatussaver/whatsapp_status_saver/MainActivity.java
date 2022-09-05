@@ -28,7 +28,6 @@ public class MainActivity extends FlutterActivity {
                             File file=new File((String) Objects.requireNonNull(call.argument("FilePath")));
                             intent.setData(Uri.fromFile(file));
                             sendBroadcast(intent);
-                            System.out.println("reached broadcast");
 
                         }
                     }

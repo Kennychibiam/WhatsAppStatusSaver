@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
-import 'package:provider/provider.dart';
 import 'package:whatsapp_status_saver/directory_manager.dart';
+import 'package:whatsapp_status_saver/method_channels/intent_channel.dart';
 import 'package:whatsapp_status_saver/models/photos.dart';
 import 'package:whatsapp_status_saver/models/saved_media.dart';
 import 'package:whatsapp_status_saver/models/videos.dart';
@@ -15,7 +15,10 @@ class MediaManagerProvider extends ChangeNotifier{
   List<PhotosModel>photosModel=[];
   List<VideosModel>videosModel=[];
   List<SavedMediaModel>savedMediaModel=[];
+  List<SavedMediaModel>selectedSavedMediaModel=[];//for deletion
   DirectoryManager? directoryManager;
+  bool isMultiSelectEnabled=false;
+  bool isEveryElementSelected=false;
 
   MediaManagerProvider(this.directoryManager);
 
@@ -72,6 +75,61 @@ class MediaManagerProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  void disableMultiSelection()async {
+    isMultiSelectEnabled=false;
+    isEveryElementSelected=false;
+    selectedSavedMediaModel=[];
+    savedMediaModel.forEach((element) { element.isSelected=false;});
+    notifyListeners();
 
+  }
+  void selectDeselectAllElements()async{
 
+    if(isEveryElementSelected){
+      selectedSavedMediaModel=[];
+      savedMediaModel.forEach((element) { element.isSelected=false;});
+      isEveryElementSelected=false;
+    }
+    else if(!isEveryElementSelected){
+      isEveryElementSelected=true;
+      savedMediaModel.forEach((element) {element.isSelected=true;
+      if(!selectedSavedMediaModel.contains(element)){
+        selectedSavedMediaModel.add(element);
+      }
+      });
+
+    }
+    notifyListeners();
+  }
+void delete()async{
+    selectedSavedMediaModel.forEach((element) {
+      savedMediaModel.remove(element);
+      if(element.savedModelPath!=null){
+      MethodChannelHandler().fileIntentBroadcastChannel(element.savedModelPath!);}
+    });
+    disableMultiSelection();
+
+}
+void enableMultiSelection(SavedMediaModel savedMedia){
+  isMultiSelectEnabled=true;
+  savedMediaModel.firstWhere((element) => element.savedModelPath==savedMedia.savedModelPath).isSelected=true;
+
+  if(!selectedSavedMediaModel.contains(savedMedia)){
+    selectedSavedMediaModel.add(savedMedia);
+  }
+  notifyListeners();
+}
+void toggleSelectItem(SavedMediaModel savedMedia)async{
+    if(savedMedia.isSelected){
+      savedMediaModel.firstWhere((element) => element.savedModelPath==savedMedia.savedModelPath).isSelected=false;
+      selectedSavedMediaModel.removeWhere((element) => element.savedModelPath==savedMedia.savedModelPath);
+
+    }
+    else{
+      savedMediaModel.firstWhere((element) => element.savedModelPath==savedMedia.savedModelPath).isSelected=true;
+      selectedSavedMediaModel.add(savedMedia);
+
+    }
+    notifyListeners();
+}
 }

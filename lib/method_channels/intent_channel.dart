@@ -16,10 +16,7 @@ class MethodChannelHandler{
     try {
       methodChannel = MethodChannel(methodChannelName);
       methodChannel?.invokeMethod("BroadcastFile", {"FilePath": filePath});
-      print("reachd");
-      print(filePath);
     }catch(e){
-      print("eeror platform");
     }
   }
 }
