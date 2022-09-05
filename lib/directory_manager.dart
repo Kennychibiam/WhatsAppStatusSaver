@@ -3,9 +3,10 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
+import 'package:whatsapp_status_saver/method_channels/intent_channel.dart';
 
 class DirectoryManager{
-  static String? rootAndroidDirectory;
+  static String? rootAndroidDirectory;//absolute directory of my android app
   Future<Map<String, dynamic>?> getWhatsAppStatusDirectory() async {
     Directory? file = await path_provider.getExternalStorageDirectory();
     List<String>? splitPlath = file?.path.split("/");
@@ -77,7 +78,10 @@ class DirectoryManager{
           Directory(rootAndroidDirectory ?? "").createSync();
         }
         newFilePath=rootAndroidDirectory! + path.basename(file.path);
+
         file.copySync(newFilePath);
+        MethodChannelHandler().fileIntentBroadcastChannel(newFilePath);
+
       }
       else {
         String androidAppPath = await getAppDefaultFilePath();
@@ -87,6 +91,8 @@ class DirectoryManager{
 
         newFilePath=rootAndroidDirectory! + path.basename(file.path);
         file.copySync(newFilePath);
+        MethodChannelHandler().fileIntentBroadcastChannel(newFilePath);
+
       }
     }catch(e){
       isFileCopySuccessful=false;

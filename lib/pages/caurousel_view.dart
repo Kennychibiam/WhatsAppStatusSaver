@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:whatsapp_status_saver/directory_manager.dart';
+import 'package:whatsapp_status_saver/method_channels/intent_channel.dart';
 import 'package:whatsapp_status_saver/models/photos.dart';
 import 'package:whatsapp_status_saver/models/saved_media.dart';
 import 'package:whatsapp_status_saver/models/videos.dart';
@@ -285,10 +287,15 @@ class _CarouselState extends State<Carousel> {
     if(file.existsSync()){
           file.deleteSync();
     }
+
     widget.models.remove(model);
     setState(() {
 
     });
+    mediaManagerProvider.savedMediaModel.remove(model);
+    mediaManagerProvider.notifyListeners();
+    MethodChannelHandler().fileIntentBroadcastChannel(filePath);
+
 
   }
   void share(String filePath)async{
@@ -315,6 +322,7 @@ class _CarouselState extends State<Carousel> {
 
         SavedMediaModel savedMediaModel=SavedMediaModel(savedModelPath:resultFromFileCopy[1]);
         customToastWidget("Status Saved");
+
         if(mediaManagerProvider.savedMediaModel.isNotEmpty){
           mediaManagerProvider.savedMediaModel.insert(0, savedMediaModel);
         }else {

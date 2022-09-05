@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:whatsapp_status_saver/directory_manager.dart';
+import 'package:whatsapp_status_saver/method_channels/intent_channel.dart';
 import 'package:whatsapp_status_saver/models/saved_media.dart';
 import 'package:whatsapp_status_saver/models/videos.dart';
 import 'package:whatsapp_status_saver/providers/media_manager_provider.dart';

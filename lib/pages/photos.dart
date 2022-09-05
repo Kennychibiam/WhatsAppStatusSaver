@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whatsapp_status_saver/directory_manager.dart';
+import 'package:whatsapp_status_saver/method_channels/intent_channel.dart';
 import 'package:whatsapp_status_saver/models/photos.dart';
 import 'package:whatsapp_status_saver/models/saved_media.dart';
 import 'package:whatsapp_status_saver/notification_widgets/custom_toast_widget.dart';
