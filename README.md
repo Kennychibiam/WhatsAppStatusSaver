@@ -14,7 +14,32 @@ Share status
 </ul>
 
 
-<h4><strong>Requirements</strong></h4>
+<h4><strong>Steps to run/Requirements</strong></h4>
+<ul>
+<li>
+Android device
+  
+</li>
+  <li>
+min sdk 22
+  
+</li>
+   <li>
+Clone project to system
+  
+</li>
+   <li>
+Open in application with integrated flutter support e.g Android studio, Visual Studio
+  
+</li>
+   <li>Launch program on emulator or android device
+  
+</li>
+  </ul>
+
+
+
+
 
 <table>
 <tr>
