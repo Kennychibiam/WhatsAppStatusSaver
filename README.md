@@ -1,16 +1,48 @@
-# whatsapp_status_saver
+<h4>This is an application for viewing and downloading status from whatsapp</h4>
 
-Whats App Status Saver
+<h4><strong>FEATURES</strong></h4>
+<ul>
+<li>
+View and download status in grid
+</li>
 
-## Getting Started
+<li>
+Share status
+</li>
+<li>Watch video statuses with video player</li>
 
-This project is a starting point for a Flutter application.
+</ul>
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+<h4><strong>Requirements</strong></h4>
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<table>
+<tr>
+<td>
+<img src="screenshots/Screenshot_20220905-235707.png"   width=200 height=500 />
+</td>
+
+<td>
+<img src="screenshots/Screenshot_20220906-011131.png"   width=200 height=500 />
+</td>
+
+
+<td>
+<img src="screenshots/Screenshot_20220906-011148.png"   width=200 height=500/>
+</td>
+
+<td>
+<img src="screenshots/Screenshot_20220906-011334.png"  width=200 height=500 />
+</td>
+
+<td>
+<img src="screenshots/Screenshot_20220906-185648.png" width=200 height=500/>
+</td>
+
+
+
+</tr>
+
+
+
+</table>
